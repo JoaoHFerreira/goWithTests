@@ -1,19 +1,44 @@
 package main
 
-import "fmt"
+import (
+	"reflect"
+)
 
-func main() {
-	result := numberAdd(1, 2)
-	string_result := StringSum("yes or ", "no")
-	fmt.Println(result)
-	fmt.Println(string_result)
+func walk(x interface{}, fn func(input string)) {
+	val := getValue(x)
 
+	walkValue := func(value reflect.Value) {
+		walk(value.Interface(), fn)
+	}
+
+	switch val.Kind() {
+	case reflect.String:
+		fn(val.String())
+	case reflect.Struct:
+		for i := 0; i < val.NumField(); i++ {
+			walkValue(val.Field(i))
+		}
+	case reflect.Slice, reflect.Array:
+		for i := 0; i < val.Len(); i++ {
+			walkValue(val.Index(i))
+		}
+	case reflect.Map:
+		for _, key := range val.MapKeys() {
+			walkValue(val.MapIndex(key))
+		}
+	case reflect.Chan:
+		for v, ok := val.Recv(); ok; v, ok = val.Recv() {
+			walkValue(v)
+		}
+	}
 }
 
-func numberAdd(number_one, number_two interface{}) interface{} {
-	return number_one + number_two
-}
+func getValue(x interface{}) reflect.Value {
+	val := reflect.ValueOf(x)
 
-func StringSum(string_one, string_two string) string {
-	return string_one + string_two
+	if val.Kind() == reflect.Ptr {
+		val = val.Elem()
+	}
+
+	return val
 }
