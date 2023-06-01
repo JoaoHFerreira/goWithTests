@@ -10,8 +10,10 @@ import (
 const ONE_SECOND time.Duration = 1 * time.Second
 
 type terminal struct {
-	pwd  string
-	dirs map[string][]string
+	pwd          string
+	dirs         map[string][]string
+	files        map[string][]string
+	list_content map[string]string
 }
 
 func (t *terminal) run() {
@@ -48,6 +50,10 @@ func (t *terminal) getCMD() string {
 
 func (t *terminal) current_path() {
 	fmt.Println(t.pwd)
+}
+
+func (t *terminal) list_current_dir() {
+	fmt.Println(t.dirs[t.pwd])
 }
 
 func main() {
