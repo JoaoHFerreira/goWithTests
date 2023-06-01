@@ -14,7 +14,6 @@ type terminal struct {
 	pwd   string
 	dirs  map[string][]string
 	files map[string][]string
-	// list_content map[string]string
 }
 
 func (t *terminal) run() {
