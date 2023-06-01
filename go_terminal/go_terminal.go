@@ -4,42 +4,41 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 )
 
 const ONE_SECOND time.Duration = 1 * time.Second
 
 type terminal struct {
-	pwd          string
-	dirs         map[string][]string
-	files        map[string][]string
-	list_content map[string]string
+	pwd   string
+	dirs  map[string][]string
+	files map[string][]string
+	// list_content map[string]string
 }
 
 func (t *terminal) run() {
 	for {
-		cmd := t.getCMD()
+		raw_cmd := t.getCMD()
+		cmd := strings.Split(raw_cmd, " ")[0]
 
 		switch cmd {
 		case "pwd\n":
-			t.current_path()
+			t.currentPath()
 		case "ls\n":
-			fmt.Println("this is a ls")
-		case "touch\n":
-			fmt.Println("this is a touch")
-		case "echo\n":
-			fmt.Println("this is echo")
-		case "cd\n":
-			fmt.Println("this is cd")
-		case "mkdir\n":
-			fmt.Println("this is echo")
+			t.listCurrentDir()
+		case "touch":
+			t.touch(raw_cmd)
+		case "echo":
+			t.echo(raw_cmd)
+		case "cd":
+			t.cd(raw_cmd)
+		case "mkdir":
+			t.mkdir(raw_cmd)
 		default:
-			fmt.Printf("%s: command not found\n", cmd[:len(cmd)-1])
+			fmt.Printf("%s: command not found\n", cmd)
 		}
-
-		fmt.Println("This is my terminal: ", *t)
 	}
-
 }
 
 func (t *terminal) getCMD() string {
@@ -48,12 +47,33 @@ func (t *terminal) getCMD() string {
 	return keyWord
 }
 
-func (t *terminal) current_path() {
+func (t *terminal) currentPath() {
 	fmt.Println(t.pwd)
 }
 
-func (t *terminal) list_current_dir() {
-	fmt.Println(t.dirs[t.pwd])
+func (t *terminal) listCurrentDir() {
+	totalFiles := append(t.dirs[t.pwd], t.files[t.pwd]...)
+	fmt.Println(totalFiles)
+}
+
+func (t *terminal) touch(raw_cmd string) {
+	filesOnly := strings.Split(raw_cmd, " ")[1:]
+	t.files[t.pwd] = append(t.files[t.pwd], filesOnly...)
+}
+
+func (t *terminal) echo(raw_cmd string) {
+	fmt.Println("here, only the echo key word will be excluded")
+}
+
+func (t *terminal) cd(raw_cmd string) {
+	splitedCommands := strings.Split(raw_cmd, " ")
+	dirToGo := splitedCommands[len(splitedCommands)-1]
+	fmt.Println(t.dirs[dirToGo])
+}
+
+func (t *terminal) mkdir(raw_cmd string) {
+	dirsOnly := strings.Split(raw_cmd, " ")[1:]
+	t.dirs[t.pwd] = append(t.dirs[t.pwd], dirsOnly...)
 }
 
 func main() {
@@ -62,6 +82,7 @@ func main() {
 		dirs: map[string][]string{
 			"/": {"/"},
 		},
+		files: make(map[string][]string),
 	}
 	goTerminal.run()
 }
