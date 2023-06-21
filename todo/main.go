@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"todo/commands"
 	"todo/database"
+
+	"gorm.io/gorm"
 )
 
 func menu() {
@@ -35,14 +37,14 @@ func terminalMsgs(option int) bool {
 	return true
 }
 
-func getTerminalActions() map[int]func() {
-	return map[int]func(){
-		1: commands.CreateTodo,
-		2: commands.GetTodo,
-		3: commands.GetTodos,
-		4: commands.UpdateTodo,
-		5: commands.DeleteTodo,
-		6: commands.Exit,
+func getTerminalActions() map[int]func(*gorm.DB) {
+	return map[int]func(*gorm.DB){
+		1: func(db *gorm.DB) { commands.CreateTodo(db) },
+		2: func(db *gorm.DB) { commands.GetTodo(db) },
+		3: func(db *gorm.DB) { commands.GetTodos(db) },
+		4: func(db *gorm.DB) { commands.UpdateTodo(db) },
+		5: func(db *gorm.DB) { commands.DeleteTodo(db) },
+		6: func(db *gorm.DB) { commands.Exit(db) },
 	}
 }
 
@@ -67,7 +69,7 @@ func main() {
 			fmt.Println("Invalid option")
 			continue
 		}
-
-		action()
+		// pass database db variable reference to action method
+		action(db)
 	}
 }
